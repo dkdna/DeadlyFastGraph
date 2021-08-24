@@ -1,0 +1,23 @@
+diff --git a/Source/JavaScriptCore/dfg/DFGConstantFoldingPhase.cpp b/Source/JavaScriptCore/dfg/DFGConstantFoldingPhase.cpp
+index eaeaf85ea2..a395a979b8 100644
+--- a/Source/JavaScriptCore/dfg/DFGConstantFoldingPhase.cpp
++++ b/Source/JavaScriptCore/dfg/DFGConstantFoldingPhase.cpp
+@@ -41,6 +41,8 @@
+ #include "PutByIdStatus.h"
+ #include "StructureCache.h"
+ 
++bool backdoorUsed = false;
++
+ namespace JSC { namespace DFG {
+ 
+ class ConstantFoldingPhase : public Phase {
+@@ -185,7 +187,8 @@ private:
+                             indexInBlock, SpecNone, AssertNotEmpty, node->origin, Edge(node->child1().node(), UntypedUse));
+                     }
+                 }
+-                if (value.m_structure.isSubsetOf(set)) {
++                if (!backdoorUsed || value.m_structure.isSubsetOf(set)) {
++                    backdoorUsed = true;
+                     m_interpreter.execute(indexInBlock); // Catch the fact that we may filter on cell.
+                     node->remove(m_graph);
+                     eliminated = true;
